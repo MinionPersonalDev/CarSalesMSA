@@ -1,0 +1,127 @@
+services:
+  # ───────────────────────────────
+  # MySQL (서비스별 DB 분리)
+  # ───────────────────────────────
+  mysql-contract:
+    image: mysql:8.4
+    container_name: mysql-contract
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: contract_db
+      MYSQL_USER: app
+      MYSQL_PASSWORD: ${MYSQL_CONTRACT_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-contract-data:/var/lib/mysql
+    networks:
+      - car-sales-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-inventory:
+    image: mysql:8.4
+    container_name: mysql-inventory
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: inventory_db
+      MYSQL_USER: app
+      MYSQL_PASSWORD: ${MYSQL_INVENTORY_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-inventory-data:/var/lib/mysql
+    networks:
+      - car-sales-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-payment:
+    image: mysql:8.4
+    container_name: mysql-payment
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: payment_db
+      MYSQL_USER: app
+      MYSQL_PASSWORD: ${MYSQL_PAYMENT_PASSWORD}
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-payment-data:/var/lib/mysql
+    networks:
+      - car-sales-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ───────────────────────────────
+  # Kafka(KRaft)
+  # ───────────────────────────────
+  kafka:
+    image: apache/kafka:4.1.1
+    container_name: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID}
+    ports:
+      - "9092:9092"
+    networks:
+      - car-sales-network
+
+  # ───────────────────────────────
+  # Kafka UI
+  # ───────────────────────────────
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    ports:
+      - "8989:8080"
+    networks:
+      - car-sales-network
+
+  # ───────────────────────────────
+  # Valkey (Redis 호환, BSD 라이선스)
+  # ───────────────────────────────
+  valkey:
+    image: valkey/valkey:8.1
+    container_name: valkey
+    ports:
+      - "6379:6379"
+    networks:
+      - car-sales-network
+
+# ───────────────────────────────
+# Volumes
+# ───────────────────────────────
+volumes:
+  mysql-contract-data:
+  mysql-inventory-data:
+  mysql-payment-data:
+
+# ───────────────────────────────
+# Networks
+# ───────────────────────────────
+networks:
+  car-sales-network:
+    driver: bridge
