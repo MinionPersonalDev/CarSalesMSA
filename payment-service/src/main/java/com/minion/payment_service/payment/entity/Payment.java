@@ -75,8 +75,7 @@ public class Payment {
 	}
 
 	public void cancel(String failReason) {
-		if (this.status == PaymentStatus.CANCELLED)
-			throw new IllegalStateException("이미 취소된 결제입니다.");
+		if (this.status == PaymentStatus.CANCELLED) return;
 
 		this.status = PaymentStatus.CANCELLED;
 		this.failReason = failReason;
