@@ -1,0 +1,17 @@
+name: Payment Service CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'payment-service/**'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service-name: payment-service
+    secrets:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
