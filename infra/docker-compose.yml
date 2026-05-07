@@ -104,7 +104,7 @@ services:
   # Valkey (Redis 호환, BSD 라이선스)
   # ───────────────────────────────
   valkey:
-    image: valkey/valkey:8.1
+    image: valkey/valkey:8.1.6
     container_name: valkey
     ports:
       - "6379:6379"
