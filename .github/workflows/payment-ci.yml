@@ -8,6 +8,10 @@ on:
     paths:
       - 'payment-service/**'
 
+permissions:
+  pull-requests: write
+  contents: read
+
 jobs:
   ci:
     uses: ./.github/workflows/ci-template.yml
