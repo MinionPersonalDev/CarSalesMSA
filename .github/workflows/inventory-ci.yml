@@ -1,0 +1,17 @@
+name: Inventory Service CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'inventory-service/**'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service-name: inventory-service
+    secrets:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
