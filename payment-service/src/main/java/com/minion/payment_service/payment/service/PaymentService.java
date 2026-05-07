@@ -16,21 +16,22 @@ public class PaymentService {
 
 	@Transactional
 	public PaymentResponse approve(PaymentApproveRequest request) {
-		Payment payment = Payment.builder()
-			.contractId(request.getContractId())
-			.amount(request.getAmount())
-			.paymentMethod(request.getPaymentMethod())
-			.build();
-
-		paymentRepository.save(payment);
-		return new PaymentResponse(payment);
+		return paymentRepository.findByContractId(request.getContractId())
+			.map(PaymentResponse::new)
+			.orElseGet(() -> {
+				Payment payment = Payment.builder()
+					.contractId(request.getContractId())
+					.amount(request.getAmount())
+					.paymentMethod(request.getPaymentMethod())
+					.build();
+				paymentRepository.save(payment);
+				return new PaymentResponse(payment);
+			});
 	}
 
 	@Transactional
 	public void cancel(Long contractId, String failReason) {
-		Payment payment = paymentRepository.findByContractId(contractId)
-			.orElseThrow(() -> new IllegalArgumentException("결제 정보를 찾을 수 없습니다. contractId: " + contractId));
-
-		payment.cancel(failReason);
+		paymentRepository.findByContractId(contractId)
+				.ifPresent(payment -> payment.cancel(failReason));
 	}
 }
