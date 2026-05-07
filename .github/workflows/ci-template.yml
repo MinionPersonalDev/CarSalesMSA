@@ -96,14 +96,11 @@ jobs:
                 {
                   parts: [
                     {
-                      text: `${prompt}\n\n\`\`\`diff\n${fullDiff.slice(0, 8000)}\n\`\`\``
+                      text: `${prompt}\n\n\`\`\`diff\n${fullDiff}\n\`\`\``
                     }
                   ]
                 }
               ],
-              generationConfig: {
-                maxOutputTokens: 1024
-              }
             };
 
             const response = await fetch(
