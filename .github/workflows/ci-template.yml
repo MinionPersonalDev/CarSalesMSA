@@ -63,11 +63,27 @@ jobs:
             const prompt = process.env.REVIEW_PROMPT;
             const baseBranch = context.payload.pull_request.base.ref;
 
+            // 신규 파일 포함해서 diff 추출
             const diff = execSync(
               `git diff origin/${baseBranch}...HEAD -- ${serviceName}/`
             ).toString();
 
-            if (!diff) {
+            // 신규 파일 내용 추출
+            const newFiles = execSync(
+              `git diff --diff-filter=A --name-only origin/${baseBranch}...HEAD -- ${serviceName}/`
+            ).toString().trim();
+
+            let fullDiff = diff;
+
+            if (newFiles) {
+              const fileContents = newFiles.split('\n').map(file => {
+                const content = execSync(`cat ${file}`).toString();
+                return `\n### 신규 파일: ${file}\n\`\`\`java\n${content}\n\`\`\``;
+              }).join('\n');
+              fullDiff = diff + '\n' + fileContents;
+            }
+
+            if (!fullDiff.trim()) {
               console.log('변경된 파일 없음, 코드리뷰 스킵');
               return;
             }
@@ -77,7 +93,7 @@ jobs:
                 {
                   parts: [
                     {
-                      text: `${prompt}\n\n\`\`\`diff\n${diff.slice(0, 8000)}\n\`\`\``
+                      text: `${prompt}\n\n\`\`\`diff\n${fullDiff.slice(0, 8000)}\n\`\`\``
                     }
                   ]
                 }
