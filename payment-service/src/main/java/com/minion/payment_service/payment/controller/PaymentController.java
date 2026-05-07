@@ -25,6 +25,6 @@ public class PaymentController {
 		@RequestParam Long contractId,
 		@RequestParam(required = false) String failReason) {
 		paymentService.cancel(contractId, failReason);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.noContent().build();
 	}
 }

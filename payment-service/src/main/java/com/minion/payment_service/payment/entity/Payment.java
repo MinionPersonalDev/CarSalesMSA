@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,9 +26,11 @@ public class Payment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Positive
 	@Column(nullable = false)
 	private Long contractId;
 
+	@Positive
 	@Column(nullable = false)
 	private Integer amount;
 
@@ -72,6 +75,9 @@ public class Payment {
 	}
 
 	public void cancel(String failReason) {
+		if (this.status == PaymentStatus.CANCELLED)
+			throw new IllegalStateException("이미 취소된 결제입니다.");
+
 		this.status = PaymentStatus.CANCELLED;
 		this.failReason = failReason;
 		this.updatedAt = LocalDateTime.now();
