@@ -39,6 +39,10 @@ public class Contract {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 20)
+	private PaymentMethod paymentMethod;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 20)
 	private ContractStatus status;
 
 	@Column(nullable = false, updatable = false)
@@ -56,11 +60,12 @@ public class Contract {
 	}
 
 	@Builder
-	public Contract(Long carId, Long customerId, Long dealerId, Integer price) {
+	public Contract(Long carId, Long customerId, Long dealerId, Integer price, PaymentMethod paymentMethod) {
 		this.carId = carId;
 		this.customerId = customerId;
 		this.dealerId = dealerId;
 		this.price = price;
+		this.paymentMethod = paymentMethod;
 		this.status = ContractStatus.CREATED;
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
