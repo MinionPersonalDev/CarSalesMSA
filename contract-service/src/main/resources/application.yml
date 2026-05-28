@@ -77,6 +77,10 @@ management:
       enabled: true
 
 feign:
+  inventory:
+    url: http://localhost:8081
+  payment:
+    url: http://localhost:8082
   client:
     config:
       default:
